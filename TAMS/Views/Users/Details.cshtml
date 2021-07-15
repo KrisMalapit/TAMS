@@ -1,0 +1,83 @@
+﻿@model TAMS.Models.User
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+@*<h2>Details</h2>
+
+<div>
+    <h4>User</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Username)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Username)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Password)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Password)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Status)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.RoleId)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Role.Id)
+        </dd>
+    </dl>
+</div>*@
+
+
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card ">
+            <div class="card-header card-header-primary card-header-icon">
+                <div class="card-text">
+                    <h4 class="card-title">User</h4>
+                    @*<p class="card-category">Create</p>*@
+                </div>
+            </div>
+            <div class="card-body ">
+
+                <dl class="dl-horizontal">
+                    <dt>
+                        User Name
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.Username)
+                    </dd>
+                    <dt>
+                        Role
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.Roles.Name)
+                    </dd>
+                    <dt>
+                        Status
+                    </dt>
+                    <dd>
+                        @ViewBag.Status
+                    </dd>
+
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

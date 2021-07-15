@@ -1,0 +1,114 @@
+﻿@model TAMS.Models.Employee
+
+@{
+    ViewData["Title"] = "Edit";
+}
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card ">
+            <div class="card-header card-header-primary card-header-icon">
+                <div class="card-text">
+                    <h4 class="card-title">Employees</h4>
+                </div>
+            </div>
+            <div class="card-body ">
+                <form asp-action="Edit" enctype="multipart/form-data" method="post">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <input type="hidden" asp-for="Id" />
+                            <div class="form-group">
+                                <label class="control-label">Employee No</label>
+                                <input asp-for="EmployeeNo" class="form-control" />
+                                <span asp-validation-for="EmployeeNo" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">First Name </label>
+                                <input asp-for="FirstName" class="form-control" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Last Name </label>
+                                <input asp-for="LastName" class="form-control" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Designation</label>
+                                <input asp-for="Designation" class="form-control" />
+                                <span asp-validation-for="Designation" class="text-danger"></span>
+                            </div>
+                            <div>
+                                <label class="control-label">Department</label>
+                                <select asp-for="DepartmentId" class="form-control" asp-items="ViewBag.DepartmentId"></select>
+                                <span asp-validation-for="DepartmentId" class="text-danger"></span>
+
+                            </div>
+                            <div>
+                                <label class="control-label">Company</label>
+                                <select asp-for="CompanyId" class="form-control" asp-items="ViewBag.CompanyId"></select>
+                                <span asp-validation-for="CompanyId" class="text-danger"></span>
+                            </div>
+                            <div>
+                                <label class="control-label">Level</label>
+                                <select asp-for="LevelId" class="form-control" asp-items="ViewBag.LevelId"></select>
+                            </div>
+                            <div>
+                                <label class="control-label">Employee Type</label>
+                                <select asp-for="EmployeeTypeId" class="form-control" asp-items="ViewBag.EmployeeTypeId"></select>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Local No</label>
+                                <input asp-for="LocalNo" class="form-control" />
+                                <span asp-validation-for="LocalNo" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Badge No</label>
+                                <input asp-for="BadgeNo" class="form-control" />
+                                <span asp-validation-for="BadgeNo" class="text-danger"></span>
+                            </div>
+
+                        </div>
+                        <div class="col-md-6" style="text-align:center;">
+                            <input name='Imagefilename' hidden value='@ViewBag.ImageFilename' />
+                            <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                                <div class="fileinput-new thumbnail ">
+
+
+                                    <img id="imgPreview" src=@("../assets/employees/" + Model.Imagefilename)  alt="...">
+                                </div>
+                                <div class="fileinput-preview fileinput-exists thumbnail"></div>
+                                <div>
+                                    <span class="btn btn-rose btn-round btn-file">
+                                        <span class="fileinput-new">Select image</span>
+                                        <span class="fileinput-exists">Change</span>
+
+                                        <input type="file" id="postedFile" name="postedFile" />
+                                    </span>
+                                    <a href="#pablo" class="btn btn-danger btn-round fileinput-exists" data-dismiss="fileinput" id="btnRemove"><i class="fa fa-times"></i> Remove</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <input type="submit" value="Save" class="btn btn-default" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+<script src="~/js/core/jquery.min.js"></script>
+<script>
+    //$('#btnRemove').click(function () {
+       
+    //    $("#imgPreview").attr("src","/assets/employees/default-avatar.png");
+    //    console.log($("#imgPreview").prop('src'));
+    //}) 
+</script>
+

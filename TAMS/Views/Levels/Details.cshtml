@@ -1,0 +1,76 @@
+﻿@model TAMS.Models.Level
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h2>Details</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card ">
+            <div class="card-header card-header-primary card-header-icon">
+                <div class="card-text">
+                    <h4 class="card-title">Level</h4>
+                    @*<p class="card-category">Create</p>*@
+                </div>
+            </div>
+            <div class="card-body ">
+               
+                <dl class="dl-horizontal">
+                    <dt>
+                        @Html.DisplayNameFor(model => model.Code)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.Code)
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.Name)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.Name)
+                    </dd>
+                </dl>
+            </div>
+        </div>
+        </div>
+</div>
+
+        @*<div class="row">
+            <div class="col-md-6">
+                <div class="card ">
+                    <div class="card-header card-header-rose card-header-icon">
+                        <div class="card-text">
+                            <h4 class="card-title">Level</h4>
+                        </div>
+                    </div>
+                    <div class="card-body ">
+                        <form asp-action="Edit">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <input type="hidden" asp-for="Id" />
+                            <div class="form-group">
+                                <label asp-for="Code" class="control-label"></label>
+                                <input asp-for="Code" class="form-control" />
+                                <span asp-validation-for="Code" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Name" class="control-label"></label>
+                                <input asp-for="Name" class="form-control" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Save" class="btn btn-default" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>*@
+
+
+
+
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+            <a asp-action="Index">Back to List</a>
+        </div>

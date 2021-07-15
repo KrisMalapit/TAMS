@@ -1,0 +1,290 @@
+﻿
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+
+@*<link rel="stylesheet" href="~/css/font-material-design.css">*@
+<style>
+    .inpTemp {
+    border-color:lightgray;
+    border-width:0.5px!important;
+    }
+    .inpTemp:focus {
+        background-color: yellow;
+    }
+</style>
+
+
+
+
+    
+
+
+
+
+
+
+<div class="row">
+    
+    <div class="col-md-12">
+
+        <div class="card">
+            <div class="card-header card-header-primary card-header-icon">
+                <div class="card-text">
+                    <h4 class="card-title">Employee Temperature Logs</h4>
+                    
+                </div>
+            </div>
+
+            <div class="card-body">
+                @*<div style="float: left">*@
+                <button id="btnViewEmp" class="btn btn-default" >Print</button>
+                <button id="btnExportEmp" class="btn btn-default">Export to Excel</button>
+                @*</div>*@
+                <div id="reportrange" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; float: right">
+                    <i class="material-icons" style="font-size: 15px;">date_range</i>
+                    <span></span>  <i class="material-icons" style="font-size: 15px;">arrow_drop_down</i>
+                </div>
+
+                <br />
+                <br />
+                <div class="material-datatables">
+                    <table id="tbl" class="table table-striped table-no-bordered table-hover dataTable" style="width: 100%!important">
+
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Employee No</th>
+                                <th>Employee Name</th>
+                                <th>Temperature 1</th>
+                                <th>Temperature 2</th>
+                                <th>Department</th>
+                            </tr>
+
+                        </thead>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+    <script>
+        var changesmade = "false";
+        $(function () {
+            $from = moment().subtract(0, 'days').format('MM/DD/YYYY');
+            $to = moment().subtract(0, 'days').format('MM/DD/YYYY');
+
+            
+        })
+        
+
+
+
+
+        $('#btnViewEmp').click(function () {
+
+ 
+            
+            window.open('@Url.Action("printReport", "Reports")?Report=rptEmployeeTemp&rptType=PDF&fDate=' + $from + '&tDate=' + $to);
+
+        });
+        $('#btnExportEmp').click(function () {
+
+          
+            window.open('@Url.Action("printReport", "Reports")?Report=rptEmployeeTemp&rptType=Excel&fDate=' + $from + '&tDate=' + $to);
+
+        });
+
+
+    $(function () {
+        var start = moment().subtract(0, 'days');
+        var end = moment();
+        
+
+
+        function cb(start, end) {
+            $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+            loadDatatable(start, end)
+            
+        }
+
+         
+
+        
+
+
+
+
+        $('#reportrange').daterangepicker({
+            startDate: start,
+            endDate: end,
+            ranges: {
+                'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        }, cb);
+
+        cb(start, end);
+        })
+
+        function loadDatatable(start,end) {
+          
+            var data = [];
+            $s = start.format('MM/DD/YYYY');
+            $e = end.format('MM/DD/YYYY');
+            $from = $s;
+            $to = $e;
+
+             $.ajax({
+                 url: "@Url.Action("getData", "EmployeeTemperature")?start=" + $s + "&end=" + $e
+                , method: "POST"
+                , dataType: 'json'
+
+                , success: function (responsedata) {
+
+                    if (responsedata.status == "success") {
+
+
+                        for (var i = 0; i < responsedata.data.length; i++) {
+
+                            var $id = responsedata.data[i].id;
+                            var linkDetails = "@Url.Action("Details", "Employees")?id=" + $id;
+                            var linkEdit = "@Url.Action("Edit", "Employees")?id=" + $id;
+                            var linkDelete = "@Url.Action("Delete", "Employees")?id=" + $id;
+                            var temp1 = "<input onkeypress='return isNumberKey(event)' onBlur='saveChanges(this)' onfocus='this.select();' onmouseup='return false;' class='inpTemp' style='direction:rtl;' data-type='temp1' data-id='" + $id +"' value=" + parseFloat(responsedata.data[i].temperature1).toFixed(1)+ ">";
+                            var temp2 = "<input onkeypress='return isNumberKey(event)' onBlur='saveChanges(this)' onfocus='this.select();' onmouseup='return false;' class='inpTemp ' style='direction:rtl;' data-type='temp2' data-id='" + $id+"' value=" + parseFloat(responsedata.data[i].temperature2).toFixed(1) + ">";
+
+                       
+
+
+                          
+
+                            data.push([
+                                moment(
+                                    new Date(responsedata.data[i].createdDate)).format("MM-DD-YYYY")
+                                , responsedata.data[i].employeeNo
+                                , responsedata.data[i].employeeName
+                                , temp1
+                                , temp2
+                                , responsedata.data[i].departmentName
+                            ]);
+
+                        }
+
+                        if ($.fn.DataTable.isDataTable('#tbl')) {
+                            $('#tbl').DataTable().destroy();
+                        }
+
+                        $('#tbl').DataTable({
+                            "data": data,
+                            "pagingType": "full_numbers",
+                            "lengthMenu": [
+                                [10, 25, 50, -1],
+                                [10, 25, 50, "All"]
+                            ],
+                            "pageLength": 50,
+                            responsive: true,
+                            language: {
+                                search: "_INPUT_",
+                                searchPlaceholder: "Search records",
+                            },
+
+                            "columnDefs": [
+                             
+                                { orderable: false, targets: [3,4]}
+                               
+                            ],
+                            "order": [[0, "asc"]]
+                        });
+
+
+                    } else {
+                        swal("Error!" + responsedata.message, "Please try again", "error");
+                    }
+
+                }
+            });
+
+        }
+        function saveChanges(x) {
+
+            var xxxx = parseFloat($(x).val()).toFixed(1);
+            $(x).val(xxxx);
+
+            if ($(x).attr('value') == $(x).val()) {
+                return false;
+            }
+
+            var dataX = {};
+            dataX[0] = x;
+            
+            
+            
+
+            $.ajax({
+                url: "@Url.Action("saveTemperature", "EmployeeTemperature")"
+                , method: "POST"
+                , data: { id: $(x).attr('data-id'), type: $(x).attr('data-type'), temp: $(x).val()}
+                    , dataType: 'json'
+                , success: function (responsedata) {
+
+                        
+                            if (responsedata.status == "success") {
+                                var o = dataX[0];
+                                
+                                $(dataX[0]).attr('value', $(o).val()) 
+                             $.notify({
+                                icon: "add_alert",
+                                    message: "<b>Success</b> User details updated!"
+
+                                },
+                                    {
+                                     type: "success",
+                                        timer: 1000,
+                                        placement: {
+                                    from: "top",
+                                            align: "right"
+                                        }
+                                });
+                        
+                           
+
+
+                            } else {
+                             $.notify({
+                                icon: "add_alert",
+                                    message: "<b>Fail</b> - " + responsedata.message
+
+                                },
+                                    {
+                                type: "danger",
+                                        timer: 1000,
+                                        placement: {
+                                    from: "top",
+                                            align: "center"
+                                        }
+                                });
+                            }
+                        }
+                    })
+
+        }
+        function isNumberKey(evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode != 46 && charCode > 31
+                && (charCode < 48 || charCode > 57))
+                return false;
+
+            return true;
+        }
+    </script>

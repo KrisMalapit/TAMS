@@ -1,0 +1,180 @@
+﻿@model TAMS.Models.Cluster
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<style>
+    .dropdown {
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+</style>
+
+
+<h2>Create</h2>
+
+
+<div class="row">
+
+    <div class="col-md-6">
+        <div class="card ">
+            <div class="card-header card-header-primary card-header-icon">
+                <div class="card-text">
+                    <h4 class="card-title">Cluster</h4>
+                </div>
+            </div>
+            <div class="card-body ">
+                <form id="frmCluster">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="Id" />
+                    <div class="form-group">
+                        <label asp-for="Code" class="control-label"></label>
+                        <input asp-for="Code" class="form-control" />
+                        <span asp-validation-for="Code" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Name" class="control-label"></label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+
+
+                        <div class="form-group">
+                            <label class="control-label">Departments</label>
+
+                            <select required style="padding-bottom: 5px;" id="DepartmentL" name="DepartmentL" class="selectpicker col-md-12" data-style="select-with-transition" multiple="" title="Choose Department" asp-items="ViewBag.DepartmentList"></select>
+                        </div>
+
+
+                        <label class="control-label">Checker</label>
+
+                        <select id="UserId" name="UserId" class="selectpicker col-md-12" data-style="select-with-transition" title="Choose Company" asp-items="ViewBag.UserId"></select>
+
+                        <div class="form-group">
+                            <input type="button" id="btnCreate" value="Save" class="btn btn-default" />
+                        </div>
+
+
+
+                    </div>
+                </form>
+            </div>
+
+        </div>
+        <div>
+            <a asp-action="Index">Back to List</a>
+        </div>
+    </div>
+
+
+
+</div>
+
+<script src="~/js/core/jquery.min.js"></script>
+
+<script>
+
+    $(function () {
+
+
+
+
+        var deptlist = '@Html.Raw(ViewBag.DepartmentsId)';
+        var chars = deptlist.split(',');
+        var names ="";
+        var cnt = 0;
+        for (let elements of chars) {
+            $("#DepartmentL option[value='" + elements + "']").prop("selected", true);
+        }
+
+        var textvalues = [];
+        $('#DepartmentL :selected').each(function(i, selected) {
+            textvalues[i] = $(selected).text();
+        });
+
+
+
+
+
+        $("#DepartmentL").closest("div").find(".filter-option-inner-inner").html(textvalues.toString())
+
+
+
+    });
+
+    $("#btnCreate").click(function () {
+
+        var data = $('#frmCluster').serializeArray();
+        var deptid = $('#DepartmentL').val();
+        var code = $('#Code').val();
+        var name =   $('#Name').val();
+        data.push({ name: "Departments", value: deptid })
+
+        if (code.trim() == "") {
+            alert("Kindly set Code");
+            $('#Code').focus();
+            return false;
+        }
+        if (name.trim() == "") {
+            alert("Kindly set Name");
+             $('#Name').focus();
+            return false;
+        }
+        if (deptid.length == 0) {
+            alert("Kindly set Department");
+            $('#DepartmentL').focus();
+            return false;
+        }
+
+
+
+
+
+                $.ajax({
+                    url: "@Url.Action("CreateEdit","Clusters")"
+                    , method: "POST"
+                    , data: data
+                    , dataType: 'json'
+                    , async: false
+                    , success: function (responsedata) {
+
+                        if (responsedata.status == "success") {
+
+                             $.notify({
+                                    icon: "add_alert",
+                                    message: "<b>Success</b> Department updated!"
+
+                                },
+                                    {
+                                        type: "success",
+                                        timer: 1000,
+                                        placement: {
+                                            from: "top",
+                                            align: "center"
+                                        }
+                                 });
+
+
+
+
+                        } else {
+                             $.notify({
+                                    icon: "add_alert",
+                                    message: "<b>Fail</b> - " + responsedata.message
+
+                                },
+                                    {
+                                        type: "danger",
+                                        timer: 1000,
+                                        placement: {
+                                            from: "top",
+                                            align: "center"
+                                        }
+                                    });
+                        }
+                    }
+                })
+    })
+</script>

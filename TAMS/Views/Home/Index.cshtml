@@ -1,0 +1,1920 @@
+﻿
+@{
+    ViewData["Title"] = "Home Page";
+}
+@{
+    string rolename = User.Claims.FirstOrDefault(c => c.Type == "RoleName").Value;
+}
+
+
+<style>
+    #qr-canvas {
+        margin: auto;
+        width: calc(100% - 20px);
+        max-width: 400px;
+    }
+
+    div.alphabet {
+        display: table;
+        width: 100%;
+        margin-bottom: 1em;
+    }
+
+        div.alphabet span {
+            display: table-cell;
+            background-color: #e91e63;
+            color: #333;
+            cursor: pointer;
+            text-align: center;
+            width: 3.5%;
+            background: linear-gradient(to bottom, #fff 0%, #dcdcdc 100%);
+            font-size: 20px;
+            font-style: normal;
+            line-height: 30px;
+        }
+
+            div.alphabet span:hover {
+                /*text-decoration: underline;*/
+                color: white !important;
+                border: 1px solid #111;
+                background-color: #585858;
+                background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #585858), color-stop(100%, #111));
+                background: -webkit-linear-gradient(top, #585858 0%, #111 100%);
+                background: -moz-linear-gradient(top, #585858 0%, #111 100%);
+                background: -ms-linear-gradient(top, #585858 0%, #111 100%);
+                background: -o-linear-gradient(top, #585858 0%, #111 100%);
+                background: linear-gradient(to bottom, #585858 0%, #111 100%);
+            }
+
+            div.alphabet span.active {
+                color: white !important;
+                border: 1px solid #111;
+                background-color: #585858;
+                background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #585858), color-stop(100%, #111));
+                background: -webkit-linear-gradient(top, #585858 0%, #111 100%);
+                background: -moz-linear-gradient(top, #585858 0%, #111 100%);
+                background: -ms-linear-gradient(top, #585858 0%, #111 100%);
+                background: -o-linear-gradient(top, #585858 0%, #111 100%);
+                background: linear-gradient(to bottom, #585858 0%, #111 100%);
+            }
+
+
+    .main-panel > .content {
+        margin-top: 35px !important;
+    }
+    /*.fileinput .thumbnail > img {
+        max-height: 500px !important;
+        width: 500px !important;
+    }
+    .thumbnail {
+        max-height: 500px !important;
+        max-width: 500px !important;
+    }*/
+
+    #imgPreviewBar {
+        height: 80% !important;
+        width: 80%;
+        max-height: 80% !important;
+        max-width: 80% !important;
+    }
+</style>
+
+
+
+<div id="statModal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style=" background-color: white; ">
+            <div class="modal-header">
+
+
+            </div>
+
+            <div class="modal-body">
+                <div class="material-datatables">
+                    <table id="tblDetails" class="table table-striped" style="width: 100%!important">
+                        <thead>
+                            <tr>
+
+                                <th>Employee Id</th>
+                                <th>Name</th>
+                                <th>Time-In</th>
+                                <th>Time-Out</th>
+
+                            </tr>
+                        </thead>
+
+                    </table>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnClose" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*<div id="scanModal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content" style="background-color:white;">
+                <div class="modal-header">
+                    <div style="width: 500px" id="reader"></div>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+
+
+
+
+
+<div id="remarksModal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="background-color:white;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Please fill out this form before proceeding</h5>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Additional Information</label>
+                    <br />
+
+                    <input id="screenRemarks" cols="3" class="form-control col-md-12">
+
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnProceedScreen" onclick="proceedScreening();" class="btn btn-success">Proceed</button>
+                <br />
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1" role="">
+    <div class="modal-dialog modal-login" role="document">
+        <div class="modal-content">
+            <div class="card card-signup card-plain">
+                <div class="modal-header">
+
+                    <input id="Id" name="Id" type="hidden" />
+                    <div class="card-header card-header-danger card-header-icon">
+                        <div class="card-text">
+
+                            <div class="card-content">
+                                <h4 class="card-title">Edit - Log</h4>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-body">
+                    <form class="form" method="post" action="UpdateDailyLog">
+
+                        <div class="card-body">
+                            <label>Emp No</label>
+                            <div class="form-group bmd-form-group">
+
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text"><i class="material-icons">face</i></div>
+                                    </div>
+
+                                    <input type="text" class="form-control" disabled id="Empno" placeholder="Employee No">
+                                </div>
+                            </div>
+                            <label>Emp Name</label>
+                            <div class="form-group bmd-form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text"><i class="material-icons">email</i></div>
+                                    </div>
+
+                                    <input type="text" class="form-control" disabled id="Empname" placeholder="Employee Name">
+                                </div>
+
+
+                            </div>
+                            <label>TIME IN</label>
+                            <div class="form-group bmd-form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text"><i class="material-icons">today</i></div>
+                                    </div>
+
+                                    <input id="inpTimeIn" type="text" class="form-control datetimepicker">
+                                </div>
+                            </div>
+                            <label>TIME OUT</label>
+                            <div class="form-group bmd-form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text"><i class="material-icons">today</i></div>
+                                    </div>
+
+                                    <input id="inpTimeOut" type="text" class="form-control datetimepicker">
+                                </div>
+                            </div>
+                            <label>Remarks</label>
+                            <div class="form-group bmd-form-group">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text"><i class="material-icons">notes</i></div>
+                                    </div>
+
+                                    <input id="Remarks" type="text" class="form-control">
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </form>
+                    <div style="text-align:center">
+                        <button id="btnProceed" onclick="saveData();" class="btn btn-primary">
+                            Proceed
+                        </button>
+                        <button id="btnCancel" data-dismiss="modal" class="btn btn-default">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+                @*<div class="modal-footer justify-content-center">
+                        <a href="#pablo" class="btn btn-primary btn-link btn-wd btn-lg">Get Started</a>
+                    </div>*@
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade" id="batchModal" tabindex="-1">
+    <div class="modal-dialog modal-login" role="document">
+        <div class="modal-content">
+            <div class="card card-signup card-plain">
+                <div class="modal-header">
+
+                    <div class="card-header card-header-danger card-header-icon">
+                        <div class="card-text">
+
+                            <div class="card-content">
+                                <h4 class="card-title">Batch Input</h4>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-body">
+                    <div class="card-body">
+                        <h4 id="noEmployees">No. of Employees</h4>
+                        <h3 id="timeSet">TIME-IN</h3>
+
+                        <div class="form-group bmd-form-group">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text"><i class="material-icons">today</i></div>
+                                </div>
+
+                                <input id="inpTimeBatch" type="text" class="form-control datetimepicker" disabled>
+                            </div>
+                        </div>
+
+                        <label>Remarks</label>
+                        <div class="form-group bmd-form-group">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text"><i class="material-icons">notes</i></div>
+                                </div>
+
+                                <input id="RemarksBatch" type="text" class="form-control">
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <div style="text-align:center">
+                        <button id="btnProceedBatch" class="btn btn-primary">
+                            Proceed
+                        </button>
+                        <button id="btnCancel" data-dismiss="modal" class="btn btn-default">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+                @*<div class="modal-footer justify-content-center">
+                        <a href="#pablo" class="btn btn-primary btn-link btn-wd btn-lg">Get Started</a>
+                    </div>*@
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header card-header-default card-header-icon">
+
+                <div class="card-text col-md-6">
+                    <div class="card-content">
+                        <h4 class="card-title">Daily Attendance Logs</h4>
+                        Summary of attendance logs for the day
+                    </div>
+                </div>
+
+                <div style="color:black;" class="float-right form-group col-md-6">
+
+                    <h4 style="font-weight:bolder;" class="mb-0 text-right">@DateTime.Now.DayOfWeek</h4>
+                    <h2 style="margin-top:0px!important;" class="font-weight-medium text-right mb-0" id="date_time"></h2>
+
+                </div>
+
+
+
+
+            </div>
+
+            @*<div class="card-body">
+
+                </div>*@
+
+            <div class="card-body ">
+                <ul class="nav nav-pills nav-pills-warning nav-pills-icons" role="tablist">
+
+                    <li class="nav-item">
+                        <a id="mnuTime" class="nav-link active " data-toggle="tab" href="#link1" role="tablist">
+                            TIME-IN/TIME-OUT
+                        </a>
+                    </li>
+                    @*<li class="nav-item">
+                            <a id="mnuBadge" class="nav-link " data-toggle="tab" href="#link3" role="tablist">
+                                BADGE ENTRY
+                            </a>
+                        </li>*@
+                    <li class="nav-item">
+                        <a id="mnuScreeningTool" class="nav-link " data-toggle="tab" href="#link4" role="tablist">
+                            SCREENING TOOL ENTRY
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#link2" role="tablist">
+                            Summary Logs
+                        </a>
+                    </li>
+
+                </ul>
+                <div class="tab-content tab-space">
+                    <div class="tab-pane active" id="link1">
+                        <div>
+
+
+                            <table style="border:2px solid white;width:100%;">
+                                <tr>
+                                    <td style="width:10%;"><label style="vertical-align:middle;">Employee Name</label></td>
+                                    @*<td style="width:30%; padding-bottom:15px;"><select style="padding-bottom:5px;" id="EmployeeId" name="EmployeeId" class="selectpicker col-md-12" data-style="select-with-transition" asp-items="ViewBag.Employees"></select></td>*@
+                                    <td style="width:50%; padding-bottom:15px;">
+                                        <select style="padding-bottom:5px;" id="EmployeeId" name="EmployeeId" class="selectpicker col-md-12" data-style="select-with-transition" multiple="" title="Choose Employee" asp-items="ViewBag.Employees"></select>
+                                    </td>
+                                    <td style="width:30%;padding-left:10px;" class="actions">
+                                        <button id="btnIn" onclick="timeInOut('IN','')" style="width:100%;" class="btn btn-success"><i class="material-icons">timetable</i>TIME-IN </button>
+                                        @*<button id="btnOut" onclick="timeInOut('OUT','')" class="btn btn-warning"><i class="material-icons">vertical_align_top</i>TIME-OUT </button>*@
+                                        @* <button id="btnTest" class="btn btn-warning"><i class="material-icons">vertical_align_top</i>TEST </button>*@
+                                    </td>
+
+
+                                </tr>
+                            </table>
+                        </div>
+
+                        <br />
+                        <div class="toolbar">
+
+                        </div>
+                        <div class="material-datatables">
+
+                            <table id="tbl" class="table table-striped table-no-bordered table-hover dataTable" style="width: 100%!important">
+
+                                <thead>
+                                    <tr>
+                                        <th><input name="select_all" value="1" id="tbl-select-all" type="checkbox" /></th>
+                                        <th>Employee No</th>
+                                        <th>Employee Name</th>
+                                        <th>Class Type</th>
+                                        <th>Time In</th>
+                                        <th>Time Out</th>
+                                        <th>Type</th>
+                                        <th>Remarks</th>
+                                        @*<th>Company</th>*@
+                                        <th>Actions</th>
+                                        <th></th>
+                                    </tr>
+
+                                </thead>
+
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="link2">
+                        <div class="row">
+                            <div class="col-lg-3 col-md-6 col-sm-6">
+                                <div class="card card-stats">
+                                    <div class="card-header card-header-warning card-header-icon">
+                                        <div class="card-icon">
+                                            <i class="material-icons">weekend</i>
+                                        </div>
+                                        <p class="card-category">Total Time-In &nbsp;</p>
+                                        <h3 class="card-title" id="timeInTotal"></h3>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="stats">
+                                            @*<i class="material-icons text-danger">warning</i>*@
+                                            <i class="material-icons">search</i>
+
+                                            <a href="#" onclick="statFunction('TIMEIN'); return false;" class="small-box-footer" style="font-family: Calibri;">
+                                                View Details
+
+                                            </a>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-sm-6">
+                                <div class="card card-stats">
+                                    <div class="card-header card-header-rose card-header-icon">
+                                        <div class="card-icon">
+                                            <i class="material-icons">equalizer</i>
+                                        </div>
+                                        <p class="card-category">Total Time-Out</p>
+                                        <h3 class="card-title" id="timeOutTotal"></h3>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="stats">
+                                            @*<i class="material-icons">local_offer</i> Tracked from Google Analytics*@
+                                            <i class="material-icons">search</i>
+                                            <a href="#" onclick="statFunction('TIMEOUT'); return false;" class="small-box-footer" style="font-family: Calibri;">
+                                                View Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-sm-6">
+                                <div class="card card-stats">
+                                    <div class="card-header card-header-success card-header-icon">
+                                        <div class="card-icon">
+                                            <i class="material-icons">store</i>
+                                        </div>
+                                        <p class="card-category">Employee/s in Vicinity</p>
+                                        <h3 class="card-title" id="vicinityTotal"></h3>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="stats">
+                                            @*<i class="material-icons">date_range</i> Last 24 Hours*@
+                                            <i class="material-icons">search</i>
+                                            <a href="#" onclick="statFunction('VICINITY'); return false;" class="small-box-footer" style="font-family: Calibri;">
+                                                View Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-sm-6">
+                                <div class="card card-stats">
+                                    <div class="card-header card-header-info card-header-icon">
+                                        <div class="card-icon">
+                                            <i class="material-icons">commute</i>
+                                        </div>
+                                        <p class="card-category">Total Official Business</p>
+                                        <h3 class="card-title" id="obTotal"></h3>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="stats">
+                                            @*<i class="material-icons">update</i> Just Updated*@
+                                            <i class="material-icons">search</i>
+                                            <a href="#" onclick="statFunction('OB'); return false;" class="small-box-footer" style="font-family: Calibri;">
+                                                View Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="link3">
+                        <div class="row form-group" style="font-size:24px;">
+                            <div class="col-md-6" style="font-size:24px;">
+                                <div class="row form-group">
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="radio" name="radtimeset" id="radtimein" value="timein" checked=""> TIME - IN
+                                            <span class="circle">
+                                                <span class="check"></span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="radio" name="radtimeset" id="radtimeout" value="timeout">TIME - OUT
+                                            <span class="circle">
+                                                <span class="check"></span>
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                </div>
+
+                                <div class="row form-group">
+                                    <label class="col-form-label col-md-2" style="text-align:left">Badge No</label>
+                                    <div class="form-group col-md-10" style="padding-right:0px!important;">
+                                        <input id="txtBadgeNo" type="text" class="form-control" style="font-size:24px;">
+                                    </div>
+
+                                </div>
+                                <div hidden>
+                                    <label class="col-form-label">ID</label>
+                                    <div>
+                                        <div class="form-group">
+                                            <input id="empid" type="text" disabled class="form-control" style="font-size:24px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="col-form-label">Employee No</label>
+                                    <div>
+                                        <div class="form-group">
+                                            <input id="empno" type="text" disabled class="form-control" style="font-size:24px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="col-form-label">Employee Name</label>
+                                    <div>
+                                        <div class="form-group">
+                                            <input id="empname" type="text" disabled class="form-control" style="font-size:24px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="col-form-label">Department</label>
+                                    <div>
+                                        <div class="form-group">
+                                            <input id="dept" type="text" disabled class="form-control" style="font-size:24px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <label class="col-form-label col-md-2" style="text-align:left;">TIME-IN</label>
+                                    <div class="form-group col-md-4" style="padding-right:0px!important;padding-top:5px!important;">
+                                        <input disabled id="txtTimeIn" type="text" class="form-control" style="font-size: 24px;">
+                                    </div>
+                                    <label class="col-form-label col-md-2" style="text-align:left;padding-left:10px;">TIME-OUT</label>
+                                    <div class="form-group col-md-4" style="padding-right:0px!important;padding-top:5px!important;">
+                                        <input disabled id="txtTimeOut" type="text" class="form-control" style="font-size: 24px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6" style="text-align:center;font-size:24px;">
+                                <div class="fileinput fileinput-new text-center" data-provides="fileinput">
+                                    <div class="fileinput-new thumbnail ">
+
+                                        <img id="imgPreview" src="" alt="...">
+                                    </div>
+
+
+                                </div>
+
+
+                            </div>
+
+                        </div>
+
+
+
+                    </div>
+                    <div class="tab-pane" id="link4">
+                        <div class="row form-group" style="font-size:24px;">
+                            <div class="col-md-6" style="font-size:24px;">
+                                <a id="btn-scan-qr"> <img src="~/assets/camera-scan.gif"></a>
+                                <canvas hidden="" id="qr-canvas"></canvas>
+
+
+
+                                <div class="row form-group" hidden>
+
+
+                                    <div id="qr-result" hidden="">
+                                        <input id="txtBarcodeNo" name="Barcode" type="text" class="form-control" style="font-size:24px;">
+                                    </div>
+
+                                </div>
+
+
+
+                                @*<div class="row form-group" hidden>
+                                        <label class="col-form-label col-md-2" style="text-align:left">Barcode</label>
+
+                                        <div class="form-group col-md-10" style="padding-right:0px!important;">
+
+                                            <input id="txtBarcodeNo" name="Barcode" type="text" class="form-control" style="font-size:24px;">
+                                             //delete this <button class="btn" onclick="LaunchScanner();"> Launch </button>
+                                        </div>
+
+                                    </div>*@
+
+
+                                <div class="row form-group">
+                                    <div style="width: 500px" id="reader"></div>
+                                </div>
+                                <div>
+                                    <label class="col-form-label">Employee No</label>
+                                    <div>
+                                        <div class="form-group">
+                                            <input id="empnoBar" type="text" disabled class="form-control" style="font-size:24px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="col-form-label">Employee Name</label>
+                                    <div>
+                                        <div class="form-group">
+                                            <input id="empnameBar" type="text" disabled class="form-control" style="font-size:24px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="col-form-label">Department</label>
+                                    <div>
+                                        <div class="form-group">
+                                            <input id="deptBar" type="text" disabled class="form-control" style="font-size:24px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="col-form-label">Remarks</label>
+                                    <div>
+                                        <div class="form-group">
+                                            <input id="remarks" type="text" disabled class="form-control" style="font-size:24px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="col-form-label">Date</label>
+                                    <div>
+                                        <div class="form-group">
+                                            <input id="dateBar" type="text" disabled class="form-control" style="font-size:24px;">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row form-group">
+                                    <button class="btn btn-success" id="btnAccept">Accept</button>
+                                    <button class="btn btn-danger" id="btnDeclined">Decline</button>
+                                </div>
+
+                            </div>
+                            <div class="col-md-6" style="text-align:center;">
+
+
+                                <img id="imgPreviewBar" src="" alt="...">
+
+                            </div>
+
+                        </div>
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+
+
+
+<script src="~/js/core/jquery.min.js"></script>
+<script src="~/js/plugins/jquery.dataTables.min.js"></script>
+<script src="~/js/select2.min.js"></script>
+<script src="~/js/plugins/moment.min.js"></script>
+<script src="~/js/plugins/bootstrap-datetimepicker.min.js"></script>
+
+
+<script src="~/js/plugins/html5-qrcode.min.js"></script>
+<script src="~/js/plugins/qr_packed.js"></script>
+
+
+
+<script>
+    $(document).ready(function () {
+
+        md.initFormExtendedDatetimepickers();
+        $('#inpTimeBatch').val("");
+        date_time('date_time');
+
+        $("#imgPreview").attr("src", "/assets/employees/default-avatar.png");
+        $("#imgPreviewBar").attr("src", "/TAMS/assets/employees/default-avatar.png");
+
+    });
+</script>
+<script>
+    var qrcode = window.qrcode;
+    const video = document.createElement("video");
+    const canvasElement = document.getElementById("qr-canvas");
+    const canvas = canvasElement.getContext("2d");
+
+    const qrResult = document.getElementById("qr-result");
+    const outputData = document.getElementById("txtBarcodeNo");
+    const btnScanQR = document.getElementById("btn-scan-qr");
+
+    let scanning = false;
+
+
+    qrcode.callback = res => {
+
+        if (res) {
+            $("#txtBarcodeNo").val(res);
+            searchValue(res);
+            scanning = false;
+
+            video.srcObject.getTracks().forEach(track => {
+                track.stop();
+            });
+
+            qrResult.hidden = false;
+            canvasElement.hidden = true;
+            btnScanQR.hidden = false;
+        }
+    };
+
+
+
+
+    btnScanQR.onclick = () => {
+        defaultData();
+        navigator.mediaDevices
+            .getUserMedia({ video: { facingMode: "environment" } })
+            .then(function (stream) {
+                scanning = true;
+                qrResult.hidden = true;
+                btnScanQR.hidden = true;
+                canvasElement.hidden = false;
+                video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+                video.srcObject = stream;
+                video.play();
+                tick();
+                scan();
+            });
+
+
+    };
+
+    function tick() {
+        canvasElement.height = video.videoHeight;
+        canvasElement.width = video.videoWidth;
+        canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+
+        scanning && requestAnimationFrame(tick);
+    }
+
+    function scan() {
+
+
+        try {
+
+            qrcode.decode();
+        } catch (e) {
+            setTimeout(scan, 300);
+        }
+    }
+
+</script>
+<script>
+
+    $screenaction = 0;
+    //$('#mnuTime').on('click', function () {
+    //    reloadDatatable();
+    //    console.log("dd");
+
+    //});
+
+    $('#mnuBadge').on('click', function () {
+
+        setTimeout(function () { $("#txtBadgeNo").focus(); }, 10);
+    });
+
+     $('#mnuScreeningTool').on('click', function () {
+
+         setTimeout(function () { $("#txtBarcodeNo").focus(); }, 10);
+         defaultData();
+    });
+
+    $('.form-check-input').click(function () {
+
+        setTimeout(function () { $("#txtBadgeNo").focus(); }, 10);
+    });
+
+    $('#imgPreview').click(function () {
+
+        setTimeout(function () { $("#txtBadgeNo").focus(); }, 10);
+    });
+    $('#link3 label').click(function () {
+
+        setTimeout(function () { $("#txtBadgeNo").focus(); }, 10);
+    });
+    $("#txtBadgeNo").click(function () {
+        $(this).select();
+    })
+
+    $("#txtBarcodeNo").click(function () {
+        $(this).select();
+    })
+
+
+    function searchValue(qrVal) {
+        defaultData();
+
+        $(this).select();
+        $.ajax({
+            url: "@Url.Action("badgeData", "AttendanceLogs")"
+            , method: "POST"
+            , data: { barcode: qrVal }
+            , dataType: 'json'
+            , async: false
+            , success: function (responsedata) {
+                if (responsedata.status == "success") {
+
+                    $("#empnoBar").val(responsedata.empno);
+                        $("#empnameBar").val(responsedata.empname);
+                        $("#deptBar").val(responsedata.dept);
+                        $("#imgPreviewBar").attr("src", "/TAMS/assets/employees/" + responsedata.imageFilename);
+                        $("#remarks").val(responsedata.remarks);
+                        $("#empid").val(responsedata.empid);
+                        $("#btnAccept").prop('disabled',false);
+                        $("#btnDeclined").prop('disabled', false);
+                        $("#dateBar").val(moment(new Date(responsedata.dt)).format("MM-DD-YYYY HH:mm:ss"));
+
+                        if (responsedata.remarks == "CLAIMED - ACCEPTED" || responsedata.remarks == "CLAIMED - DENIED"|| responsedata.remarks == "FAILED - OVERDUE") {
+                              $("#btnAccept").prop('disabled', true);
+                              $("#btnDeclined").prop('disabled', true);
+                        }
+
+
+                } else {
+                    defaultData();
+                    $.notify({
+                        icon: "add_alert",
+                        message: "<b>Fail</b> - " + responsedata.message
+
+                    },
+                        {
+                            type: "danger",
+                            timer: 1000,
+                            placement: {
+                                from: "top",
+                                align: "center"
+                            }
+                        });
+                }
+            }
+        });
+
+    }
+    @*$("#txtBarcodeNo").keydown(function (e) {
+        defaultData();
+        if (e.keyCode == 13) {
+            $(this).select();
+            $.ajax({
+                url: "@Url.Action("badgeData", "AttendanceLogs")"
+                , method: "POST"
+                , data: { barcode: $("#txtBarcodeNo").val() }
+                , dataType: 'json'
+                , async: false
+                , success: function (responsedata) {
+                    if (responsedata.status == "success") {
+
+                        $("#empnoBar").val(responsedata.empno);
+                        $("#empnameBar").val(responsedata.empname);
+                        $("#deptBar").val(responsedata.dept);
+                        $("#imgPreviewBar").attr("src", "/TAMS/assets/employees/" + responsedata.imageFilename);
+                        $("#remarks").val(responsedata.remarks);
+                        $("#empid").val(responsedata.empid);
+                        $("#btnAccept").prop('disabled',false);
+                        $("#btnDeclined").prop('disabled', false);
+                        $("#dateBar").val(moment(new Date(responsedata.dt)).format("MM-DD-YYYY HH:mm:ss"));
+
+                       if (responsedata.remarks == "CLAIMED - ACCEPTED" || responsedata.remarks == "CLAIMED - DENIED"|| responsedata.remarks == "FAILED - OVERDUE") {
+                              $("#btnAccept").prop('disabled', true);
+                              $("#btnDeclined").prop('disabled', true);
+                        }
+
+
+                    } else {
+                        defaultData();
+                        $.notify({
+                            icon: "add_alert",
+                            message: "<b>Fail</b> - " + responsedata.message
+
+                        },
+                            {
+                                type: "danger",
+                                timer: 1000,
+                                placement: {
+                                    from: "top",
+                                    align: "center"
+                                }
+                            });
+                    }
+                }
+            });
+        }
+    });*@
+
+    function proceedScreening() {
+
+
+
+
+
+        if ($screenaction == 1 && $("#remarks").val() != "PASSED") {
+             var str = $("#screenRemarks").val();
+             if (str.trim() == "" ) {
+                 $("#screenRemarks").focus();
+                 alert("Please fill up additional information")
+                 return false;
+             }
+        }
+
+        if ($screenaction == 0 && $("#remarks").val() == "PASSED") {
+            var str = $("#screenRemarks").val();
+             if (str.trim() == "" ) {
+                 $("#screenRemarks").focus();
+                 alert("Please fill up additional information")
+                 return false;
+             }
+        }
+
+
+
+
+
+
+
+
+        $barcode = $("#txtBarcodeNo").val();
+        $remarks = $("#screenRemarks").val();
+        $action = $screenaction;
+
+
+        var data = [];
+        data.push({ name: "BarCode", value: $barcode });
+        data.push({ name: "Action", value: $action });
+        data.push({ name: "Remarks", value: $remarks });
+
+
+
+
+
+            $.ajax({
+                url: "@Url.Action("saveScreening", "AttendanceLogs")"
+                , method: "POST"
+                , data: data
+                , dataType: 'json'
+                , async: false
+                , success: function (responsedata) {
+                    if (responsedata.status == "success") {
+                        $("#remarks").val("CLAIMED");
+                        $("#remarksModal").modal('hide');
+
+                        $datenow = Date(Date.now());
+                        $datenow = moment(new Date($datenow)).format("MM-DD-YYYY HH:mm:ss")
+
+                        $timeset = "IN";
+                        var arr = [$("#empid").val()];
+                        $('#inpTimeBatch').val($datenow);
+
+
+                        if ($action == 1) {
+                             saveDataLogs($timeset, arr, 'false','QR');
+                        }
+
+
+
+
+                        $("#btnAccept").prop('disabled', true);
+                        $("#btnDeclined").prop('disabled', true);
+
+
+
+                        $("#txtBarcodeNo").focus();
+                    } else {
+                        defaultData();
+                        $.notify({
+                            icon: "add_alert",
+                            message: "<b>Fail</b> - " + responsedata.message
+
+                        },
+                            {
+                                type: "danger",
+                                timer: 1000,
+                                placement: {
+                                    from: "top",
+                                    align: "center"
+                                }
+                            });
+                    }
+                }
+            });
+    };
+    $('#btnAccept').click(function () {
+        $screenaction = 1;
+        if ($("#remarks").val() != "PASSED" ) {
+            $("#remarksModal").modal('show');
+        } else {
+
+            proceedScreening();
+        }
+    });
+
+    $('#btnDeclined').click(function () {
+         $screenaction = 0;
+        if ($("#remarks").val() == "PASSED" ) {
+            $("#remarksModal").modal('show');
+        } else {
+
+            proceedScreening();
+        }
+    });
+
+
+    $("#txtBadgeNo").keydown(function (e) {
+        defaultData();
+        if (e.keyCode == 13) {
+            $(this).select();
+            $.ajax({
+                url: "@Url.Action("badgeData", "AttendanceLogs")"
+                , method: "POST"
+                , data: { badgeNo: $('#txtBadgeNo').val() }
+                , dataType: 'json'
+                , async: false
+                , success: function (responsedata) {
+                    if (responsedata.status == "success") {
+
+                        $("#empid").val(responsedata.empid);
+                        $("#empno").val(responsedata.empno);
+                        $("#empname").val(responsedata.empname);
+                        $("#dept").val(responsedata.dept);
+                        $("#imgPreview").attr("src", "/assets/employees/" + responsedata.imageFilename);
+
+
+
+                        $datenow = Date(Date.now());
+                        $datenow = moment(new Date($datenow)).format("MM-DD-YYYY HH:mm:ss")
+                        $('#inpTimeBatch').val($datenow)
+                        $('#inpTimeOut').val($datenow);
+                        $timeset = "IN";
+                        var radioValue = $("input[name='radtimeset']:checked").val();
+                        if (radioValue) {
+                            if (radioValue == "timein") {
+                                $timeset = "IN";
+                            } else {
+                                $timeset = "OUT";
+                            }
+                        }
+                        var arr = [responsedata.empid];
+                        saveDataLogs($timeset, arr, 'false','QR');
+
+
+                        $.ajax({
+                            url: "@Url.Action("lastTimeInOut", "AttendanceLogs")"
+                            , method: "POST"
+                            , data: { empid: responsedata.empid }
+                            , async: false
+                            , dataType: 'json'
+                            , success: function (responsedata) {
+                                if (responsedata.status == "success") {
+                                    $('#txtTimeIn').val(responsedata.timeIn);
+                                    $('#txtTimeOut').val(responsedata.timeOut);
+                                } else {
+                                    $.notify({
+                                        icon: "add_alert",
+                                        message: "<b>Fail</b> - " + responsedata.message
+
+                                    },
+                                        {
+                                            type: "danger",
+                                            timer: 1000,
+                                            placement: {
+                                                from: "top",
+                                                align: "center"
+                                            }
+                                        });
+                                }
+                            }
+                        })
+
+
+
+
+
+                    } else {
+                        defaultData();
+                        $.notify({
+                            icon: "add_alert",
+                            message: "<b>Fail</b> - " + responsedata.message
+
+                        },
+                            {
+                                type: "danger",
+                                timer: 1000,
+                                placement: {
+                                    from: "top",
+                                    align: "center"
+                                }
+                            });
+                    }
+                }
+            });
+        }
+    });
+    function defaultData() {
+        $("#empno").val("");
+        $("#empname").val("");
+        $("#dept").val("");
+        $("#imgPreview").attr("src", "/assets/employees/default-avatar.png");
+        $('#txtTimeIn').val("");
+        $('#txtTimeOut').val("");
+
+
+        //barcode
+
+        $("#empnoBar").val("");
+        $("#empnameBar").val("");
+        $("#deptBar").val("");
+        $("#remarks").val("");
+        $("#screenRemarks").val("");
+        $("#dateBar").val("");
+        $("#imgPreviewBar").attr("src", "/TAMS/assets/employees/default-avatar.png");
+        $("#btnAccept").prop('disabled',true);
+        $("#btnDeclined").prop('disabled', true);
+
+    }
+    function date_time(id) {
+        date = new Date;
+        year = date.getFullYear();
+        month = date.getMonth();
+        months = new Array('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December');
+        d = date.getDate();
+        day = date.getDay();
+        days = new Array('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday');
+        h = date.getHours();
+        if (h < 10) {
+            h = "0" + h;
+        }
+        m = date.getMinutes();
+        if (m < 10) {
+            m = "0" + m;
+        }
+        s = date.getSeconds();
+        if (s < 10) {
+            s = "0" + s;
+        }
+
+        result = ''+ months[month] + ' ' + d + ', ' + year + ' ' + h + ':' + m + ':' + s;
+        document.getElementById(id).innerHTML = result;
+        setTimeout('date_time("' + id + '");', '1000');
+
+        var midnight = h + ':' + m + ':' + s;
+        if (midnight == "00:00:01") {
+            console.log("reload");
+            reloadDatatable();
+        }
+
+
+        return true;
+    }
+
+
+
+
+    $(document).ready(function () {
+
+        reloadDatatable();
+        $('#EmployeeId').removeAttr("selected");
+
+    });
+
+
+
+
+
+    $('#EmployeeId').change(function () {
+
+        var count = $("#EmployeeId option:selected[value!='']").length;
+        console.log(count);
+        if (count == 1) {
+            console.log($('#inpTimeBatch').val() );
+            if ($('#inpTimeBatch').val() == "") {
+                $datenow = Date(Date.now());
+
+                $datenow = moment(new Date($datenow)).format("MM-DD-YYYY HH:mm:ss")
+
+
+                //$datenow = new Date($datenow).toLocaleDateString() + ' ' + new Date($datenow).toLocaleTimeString();
+
+
+
+                $('#inpTimeBatch').val($datenow)
+            }
+        }
+        if (count == 0) {
+            $('#inpTimeBatch').val("");
+        }
+
+
+    });
+
+    @*$("#EmployeeId").select2({
+        closeOnSelect: false,
+        ajax: {
+            url: "@Url.Action("SearchEmployee_Json", "Employees")",
+                dataType: 'json',
+                delay: 300,
+                data: function (params) {
+                    return {
+                        q: params.term, // search term
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return {
+                        results: data.items
+                    };
+                },
+                cache: false
+            }
+    });*@
+
+    function saveData() {
+
+
+        //$('#Id').val(id)
+        //$('#Empno').val(empno)
+        //$('#Empname').val(empname)
+        //$('#inpTimeIn').val(dateIn)
+        //$('#inpTimeOut').val(dateOut)
+
+
+
+            $.ajax({
+            url: "@Url.Action("updateDailyLogs", "AttendanceLogs")"
+            , method: "POST"
+                , data: { id: $('#Id').val(), timein: $('#inpTimeIn').val(), timeout: $('#inpTimeOut').val(), remarks: $('#Remarks').val() }
+            , dataType: 'json'
+            , success: function (responsedata) {
+                if (responsedata.status == "success") {
+                    $.notify({
+                        icon: "add_alert",
+                        message: "<b>Success</b> - " + responsedata.message
+
+                    },
+                        {
+                            type: "success",
+                            timer: 1000,
+                            placement: {
+                                from: "top",
+                                align: "center"
+                            }
+                        });
+                    reloadDatatable();
+                    $("#editModal").modal('hide')
+                } else {
+                    $.notify({
+                        icon: "add_alert",
+                        message: "<b>Fail</b> - " + responsedata.message
+
+                    },
+                        {
+                            type: "danger",
+                            timer: 1000,
+                            placement: {
+                                from: "top",
+                                align: "center"
+                            }
+                        });
+                }
+            }
+        });
+
+
+    }
+    function formatAMPM(date) {
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        var strTime = hours + ':' + minutes + ' ' + ampm;
+        return strTime;
+    }
+
+    function outItem(id) {
+
+
+
+        var $rowtd = $('#tbl').find("[data-id='" + id + "']").closest("tr");
+
+
+
+
+
+              $.ajax({
+                    url: "@Url.Action("timeOut", "AttendanceLogs")"
+                    , method: "POST"
+                    , data: { id: id }
+                    , dataType: 'json'
+                    , success: function (responsedata) {
+                        if (responsedata.status == "success") {
+                            $.notify({
+                                icon: "add_alert",
+                                message: "<b>Success</b> - " + responsedata.message
+
+                            },
+                                {
+                                    type: "success",
+                                    timer: 500,
+                                    placement: {
+                                        from: "top",
+                                        align: "center"
+                                    }
+                                });
+                            //reloadDatatable();
+
+                            var dtimeout = moment(new Date()).format("MM-DD-YYYY HH:mm:ss")
+                            $rowtd.find('td:eq(5)').html(dtimeout);
+
+                        } else {
+                            $.notify({
+                                icon: "add_alert",
+                                message: "<b>Fail</b> - " + responsedata.message
+
+                            },
+                                {
+                                    type: "danger",
+                                    timer: 1000,
+                                    placement: {
+                                        from: "top",
+                                        align: "center"
+                                    }
+                                });
+                        }
+                    }
+                });
+    }
+    function editLog(empno,empname,timein,timeout,id) {
+        if (timeout == '0001-01-01T00:00:00') {
+            timeout = "";
+        } else {
+            timeout = moment(new Date(timeout)).format("MM-DD-YYYY HH:mm:ss")
+        }
+        $('#Id').val(id)
+        $('#Empno').val(empno)
+        $('#Empname').val(empname)
+        $('#inpTimeIn').val(moment(new Date(timein)).format("MM-DD-YYYY HH:mm:ss"))
+        $('#inpTimeOut').val(timeout)
+        $("#editModal").modal('show')
+    }
+    $('#btnProceedBatch').click(function () {
+        var arr = [];
+        table = $('#tbl').DataTable();
+        table.$('input[type="checkbox"]').each(function () {
+            if (this.checked) {
+                arr.push(this.value);
+            }
+        })
+
+
+        $empid = '';
+
+        $type = document.getElementById('timeSet').innerHTML == 'TIME-IN' ? 'IN' : 'OUT';
+        if ($type == 'IN') {
+            $empid = $('#EmployeeId').val();
+        } else {
+            $empid = arr;
+        }
+
+
+
+        saveDataLogs($type, $empid,'true','Manual')
+    });
+
+
+
+
+    function LaunchScanner() {
+       var html5QrcodeScanner = new Html5QrcodeScanner(
+	    "reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render(onScanSuccess);
+        //$("#scanModal").modal('show')
+    }
+    function onScanSuccess(qrCodeMessage) {
+        var scanStat = document.getElementById('reader__status_span').innerHTML;
+        if (scanStat == 'MATCH') {
+            //$("#scanModal").modal('hide');
+            searchValue(qrCodeMessage);
+            $("#txtBarcodeNo").val(qrCodeMessage);
+
+        }
+    }
+
+
+
+
+
+
+
+    function saveDataLogs($type, $empid, $batch,$inputformat) {
+
+
+
+
+
+        $datetime = Date(Date.now);
+        $rem = "";
+
+        //if ($batch) {
+            $datetime = $('#inpTimeBatch').val();
+        //    $rem = $('#RemarksBatch').val();
+        //} else {
+        //    $datetime = moment(new Date($datetime)).format("YYYY-MM-DD hh:mm:ss A");
+        //}
+
+
+
+        $.ajax({
+            url: "@Url.Action("timeInput", "AttendanceLogs")"
+            , method: "POST"
+            , data: { EntryType: $type, EmpList: $empid, DateTrans: $datetime, Remarks: $rem, logtype: $inputformat }
+
+            , dataType: 'json'
+            , async: false
+            , success: function (responsedata) {
+                if (responsedata.status == "success") {
+                    $.notify({
+                        icon: "add_alert",
+                        message: "<b>Success</b> - " + responsedata.message
+
+                    },
+                        {
+                            type: "success",
+                            timer: 1000,
+                            placement: {
+                                from: "top",
+                                align: "center"
+                            }
+                        });
+
+
+                    $('#EmployeeId').removeAttr("selected");
+                    $('#EmployeeId').val('CHOOSE EMPLOYEE').trigger('change');
+                    $('#inpTimeBatch').val("");
+                    reloadDatatable();
+                    $("#batchModal").modal('hide')
+
+
+
+                } else {
+                    $.notify({
+                        icon: "add_alert",
+                        message: "<b>Fail</b> - " + responsedata.message
+
+                    },
+                        {
+                            type: "danger",
+                            timer: 1000,
+                            placement: {
+                                from: "top",
+                                align: "center"
+                            }
+                        });
+                }
+            }
+        });
+    }
+    function timeInOut($type, $empid) {
+        $('#RemarksBatch').val('');
+
+        //$datenow = Date(Date.now());
+        //$datenow = new Date($datenow).toLocaleDateString() + ' ' + new Date($datenow).toLocaleTimeString();
+
+        //$('#inpTimeBatch').val($datenow)
+
+
+
+
+
+        if ($empid === "") {
+            $empid = $('#EmployeeId').val();
+        }
+
+        if ($type == 'OB') {
+            if (confirm('Are you sure you want to change data in TYPE column?')) {
+
+            } else {
+                return false;
+            }
+        }
+
+
+
+        if ($type == 'IN' || $type == 'OUT') {
+            if ($type == 'IN') {
+                if (($empid.length > 1)) {
+                    $('#timeSet').text('TIME-IN');
+                    $('#noEmployees').text('No. of Employees : ' + $empid.length )
+                    $("#batchModal").modal('show')
+
+
+                } else {
+                    if ($empid.length < 1) {
+                        alert("No record found");
+                    } else {
+                        saveDataLogs($type, $empid,'','Manual')
+                    }
+
+                }
+            }
+            if ($type == 'OUT') {
+
+                $datenow = Date(Date.now());
+                //$datenow = new Date($datenow).toLocaleDateString() + ' ' + new Date($datenow).toLocaleTimeString();
+                $datenow = moment(new Date($datenow)).format("MM-DD-YYYY HH:mm:ss")
+
+
+                $('#inpTimeBatch').val($datenow)
+
+
+                var arr = [];
+                table = $('#tbl').DataTable();
+                table.$('input[type="checkbox"]').each(function () {
+                    if (this.checked) {
+                        arr.push(this.value);
+                    }
+                })
+
+                if (arr.length < 1) {
+                    alert("No record found");
+                } else {
+
+                    $('#timeSet').text('TIME-OUT');
+                    $('#noEmployees').text('No. of Employees : ' + arr.length)
+                    $("#batchModal").modal('show')
+
+
+                }
+
+            }
+
+        }
+        else {
+
+            saveDataLogs($type, $empid, '', 'Manual')
+        }
+
+
+    }
+    function deleteItem($id) {
+        Swal.fire({
+                title: 'Are you sure you want to delete item?',
+                text: "You won't be able to revert this!",
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.value) {
+
+                    $.post("@Url.Action("DeleteLog", "AttendanceLogs")", {id:$id}
+                       , function (responseData) {
+                           if (responseData.status == "success") {
+                               Swal.fire({
+                                   type: 'success',
+                                   title: 'Your file has been deleted',
+                                   showConfirmButton: false,
+                                   timer: 1500
+                               })
+                               reloadDatatable();
+
+                           } else {
+                               swal("Error deleting!", responseData.message, "error");
+                           }
+                       });
+                }
+            })
+    }
+
+    function reloadDatatable() {
+
+
+        var data = [];
+         $.ajax({
+            url: "@Url.Action("getData","AttendanceLogs")?type=filter"
+            , method: "POST"
+            , dataType: 'json'
+
+            , success: function (responsedata) {
+
+                if (responsedata.status == "success") {
+                    $('#timeInTotal').text(responsedata.totalIn);
+                    $('#timeOutTotal').text(responsedata.totalOut);
+                    $('#vicinityTotal').text(responsedata.totalIn - responsedata.totalOut);
+                    $('#obTotal').text(responsedata.totalOB);
+
+
+
+                    for (var i = 0; i < responsedata.data.length; i++) {
+
+                        var $id = responsedata.data[i].id;
+                        var linkDetails = "@Url.Action("Details", "Employees")?id="+ $id;
+                        var linkEdit = "@Url.Action("Edit", "Employees")?id="+ $id;
+                        var linkDelete = "@Url.Action("Delete", "Employees")?id=" + $id;
+                        var ob = 'OB';
+
+
+                        $actions =
+                               '<a title="Time Out" data-id="' + $id + '" onclick="outItem(\'' + $id + '\')"  class="btn btn-warning btn-link"><i class="material-icons">query_builder</i></a>' +
+                               '<a title="Official Business" onclick="timeInOut(\'' + ob + '\',\'' + responsedata.data[i].employeeId + '\')" class="btn btn-info btn-link"><i class="material-icons">airplanemode_active</i></a>' +
+
+                               '<a title="Edit" onclick="editLog(\'' + responsedata.data[i].employeeNo + '\',\'' + responsedata.data[i].employeeName + '\',\'' + responsedata.data[i].timeIn + '\',\'' + responsedata.data[i].timeOut + '\',\'' + $id + '\')" class="btn btn-success btn-link" ><i class="material-icons">edit</i></a>' +
+
+                               '<a title="Delete" onclick="deleteItem(\'' + $id + '\')"  class="btn btn-danger btn-link"><i class="material-icons">close</i></a>';
+
+                               var $timeOut = "";
+                               var timeO = new Date(responsedata.data[i].timeOut).toLocaleDateString() + ' ' + new Date(responsedata.data[i].timeOut).toLocaleTimeString();
+
+                               if (timeO == '1/1/1 12:00:00 AM') {
+                                   $timeOut = "-";
+                               } else {
+                                   $timeOut = moment(new Date(responsedata.data[i].timeOut)).format("MM-DD-YYYY HH:mm:ss")
+                               }
+
+                               data.push([
+                                   '<input type="checkbox" name="id[]" value="' + responsedata.data[i].employeeId +'">'
+                                   , responsedata.data[i].employeeNo, responsedata.data[i].employeeName
+                                   , responsedata.data[i].employeeType
+                                   //, new Date(responsedata.data[i].timeIn).toLocaleDateString() + ' ' + new Date(responsedata.data[i].timeIn).toLocaleTimeString()
+                                   , moment(new Date(responsedata.data[i].timeIn)).format("MM-DD-YYYY HH:mm:ss")
+                                   , $timeOut
+
+                                   , responsedata.data[i].type, responsedata.data[i].remarks
+                                   //, responsedata.data[i].companyName,
+                                   , $actions
+                                   , responsedata.data[i].id]);
+
+                                }
+
+                    if ($.fn.DataTable.isDataTable('#tbl')) {
+                        $('#tbl').DataTable().destroy();
+                        $(".alphabet").remove();
+                    }
+
+
+                    //apply alphabetical
+                    var _alphabetSearch = '';
+
+                    $.fn.dataTable.ext.search.push(function (settings, searchData) {
+                        if (!_alphabetSearch) {
+                            return true;
+                        }
+
+                        if (searchData[2].charAt(0) === _alphabetSearch) {
+                            return true;
+                        }
+
+                        return false;
+                    });
+
+
+
+                    var table = $('#tbl').DataTable({
+                        "data": data,
+                        "pagingType": "full_numbers",
+                        "lengthMenu": [
+                            [10, 25, 50, -1],
+                            [10, 25, 50, "All"]
+                        ],
+                        "pageLength": 50,
+                        responsive: true,
+                        language: {
+                            search: "_INPUT_",
+                            searchPlaceholder: "Search records",
+                        },
+                        columnDefs: [
+                            { orderable: false, targets: 0 },
+                            { visible: false, targets: 9 },
+                            { className: "td-actions text-right", targets: 8 },
+
+                        ],
+                        select: {
+                            style: 'multi',
+                            selector: 'td:first-child'
+                        },
+                        initComplete: function () {
+                            $("#tbl_length")
+                                .append('&nbsp;&nbsp;&nbsp; <button id="btnOut" disabled onclick="timeInOut(' + "'OUT'" +')" class="btn btn-danger btn-md"><i class="material-icons">schedule</i>&nbsp;TIME-OUT </button>');
+                        },
+                        order: [9, 'desc']
+                    });
+
+
+
+                    var alphabet = $('<div class="alphabet"/>').append('Search:');
+                    $('<span class="clear active"/>')
+                        .data('letter', '')
+                        .html('None')
+                        .appendTo(alphabet);
+
+                    for (var i = 0; i < 26; i++) {
+                        var letter = String.fromCharCode(65 + i);
+
+                        $('<span/>')
+                            .data('letter', letter)
+                            .html(letter)
+                            .appendTo(alphabet);
+                    }
+
+                    alphabet.insertBefore(table.table().container());
+
+                    alphabet.on('click', 'span', function () {
+
+                        alphabet.find('.active').removeClass('active');
+                        $(this).addClass('active');
+
+                        _alphabetSearch = $(this).data('letter');
+                        table.draw();
+
+
+                        if (this.innerHTML === "None") {
+
+                            location.reload();
+                        }
+                    });
+
+                    //end alphabetical
+
+
+                } else {
+                swal("Error!" + responsedata.message, "Please try again", "error");
+                }
+
+            }
+        });
+    }
+    // Handle click on "Select all" control
+
+
+    $('#tbl-select-all').on('click', function () {
+        table = $('#tbl').DataTable();
+        // Check/uncheck all checkboxes in the table
+        var rows = table.rows({ 'search': 'applied' }).nodes();
+        $('input[type="checkbox"]', rows).prop('checked', this.checked);
+
+
+
+    });
+
+    // Handle click on checkbox to set state of "Select all" control
+    $('#tbl tbody').on('change', 'input[type="checkbox"]', function () {
+        // If checkbox is not checked
+        if (!this.checked) {
+            var el = $('#tbl-select-all').get(0);
+            // If "Select all" control is checked and has 'indeterminate' property
+            if (el && el.checked && ('indeterminate' in el)) {
+                // Set visual state of "Select all" control
+                // as 'indeterminate'
+                el.indeterminate = true;
+            }
+        }
+
+    });
+
+
+
+    $('#tbl').on('change', 'input[type="checkbox"]', function () {
+        var counterChecked = 0;
+        this.checked ? counterChecked++ : counterChecked--;
+        counterChecked > 0 ? $('#btnOut').prop("disabled", false) : $('#btnOut').prop("disabled", true);
+    });
+
+
+    $('#btnTest').click(function () {
+        var arr = [];
+        table = $('#tbl').DataTable();
+        table.$('input[type="checkbox"]').each(function () {
+            if (this.checked) {
+                // Create a hidden element
+                arr.push(this.value);
+
+            }
+        })
+        //console.log(arr);
+    })
+
+    function statFunction(stat) {
+        loadDatatable(stat);
+        $('#statModal').modal('show');
+    }
+    function loadDatatable(stat) {
+
+
+        var data = [];
+         $.ajax({
+            url: "@Url.Action("getDataDetails","AttendanceLogs")?stat=" + stat
+            , method: "POST"
+            , dataType: 'json'
+            , success: function (responsedata) {
+
+                if (responsedata.status == "success") {
+
+
+                    for (var i = 0; i < responsedata.data.length; i++) {
+
+                        var $id = responsedata.data[i].id;
+                        var linkDetails = "@Url.Action("Details", "Employees")?id="+ $id;
+                        var linkEdit = "@Url.Action("Edit", "Employees")?id="+ $id;
+                        var linkDelete = "@Url.Action("Delete", "Employees")?id=" + $id;
+                        var ob = 'OB';
+
+                        var $timeOut = "";
+                        var timeO = new Date(responsedata.data[i].timeOut).toLocaleDateString() + ' ' + new Date(responsedata.data[i].timeOut).toLocaleTimeString();
+
+                        if (timeO == '1/1/1 12:00:00 AM') {
+                            $timeOut = "-";
+                        } else {
+                            //$timeOut = new Date(responsedata.data[i].timeOut).toLocaleDateString() + ' ' + new Date(responsedata.data[i].timeOut).toLocaleTimeString();
+                            $timeOut = moment(new Date(responsedata.data[i].timeOut)).format("MM-DD-YYYY HH:mm:ss")
+                        }
+
+
+                        data.push([responsedata.data[i].employeeNo
+                            , responsedata.data[i].employeeName
+                            //, new Date(responsedata.data[i].timeIn).toLocaleDateString() + ' ' + new Date(responsedata.data[i].timeIn).toLocaleTimeString()
+
+                            , moment(new Date(responsedata.data[i].timeIn)).format("MM-DD-YYYY HH:mm:ss")
+                            , $timeOut
+                           ]);
+
+                    }
+
+                    if ($.fn.DataTable.isDataTable('#tblDetails')) {
+                        $('#tblDetails').DataTable().destroy();
+                    }
+
+                    $('#tblDetails').DataTable({
+                        "data": data,
+                        "pagingType": "full_numbers",
+                        "lengthMenu": [
+                            [10, 25, 50, -1],
+                            [10, 25, 50, "All"]
+                        ],
+                        responsive: true,
+                        language: {
+                            search: "_INPUT_",
+                            searchPlaceholder: "Search records",
+                        },
+                        "order": [[2, "desc"]]
+
+                    });
+
+
+                } else {
+                swal("Error!" + responsedata.message, "Please try again", "error");
+                }
+
+            }
+        });
+    }
+
+</script>

@@ -1,0 +1,74 @@
+﻿@model TAMS.Models.Employee
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card ">
+            <div class="card-header card-header-primary card-header-icon">
+                <div class="card-text">
+                    <h4 class="card-title">Employee</h4>
+                    @*<p class="card-category">Create</p>*@
+                </div>
+            </div>
+            <div class="card-body ">
+
+                <dl class="dl-horizontal">
+                    <dt>
+                        @Html.DisplayNameFor(model => model.EmployeeNo)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.EmployeeNo)
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.FirstName)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.FirstName)
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.LastName)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.LastName)
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.Designation)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.Designation)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayNameFor(model => model.Department)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.Department.Name)
+                    </dd>
+                    <dt>
+                        @Html.DisplayNameFor(model => model.Company)
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.Company.Name)
+                    </dd>
+                    <dt>
+                        Level
+                    </dt>
+                    <dd>
+                        @Html.DisplayFor(model => model.Levels.Name)
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
