@@ -12,7 +12,7 @@ namespace TAMS.Models
         public string Name { get; set; }
         public string Departments { get; set; }
         public string Status { get; set; }
-        public int UserId { get; set; }
-        public virtual User Users { get; set; }
+        public string UserId { get; set; }
+        //public virtual User Users { get; set; }
     }
 }

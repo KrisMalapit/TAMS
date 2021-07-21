@@ -23,6 +23,7 @@ namespace TAMS.Models
         public DbSet<Level> Levels { get; set; }
         public DbSet<EmployeeType> EmployeeTypes { get; set; }
         public DbSet<Cluster> Clusters { get; set; }
+        public DbSet<ClusterUser> ClusterUsers { get; set; }
         
 
         public DbSet<ScreeningToolData> ScreeningToolData { get; set; }

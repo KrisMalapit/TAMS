@@ -50,7 +50,7 @@
 
                         <label class="control-label">Checker</label>
 
-                        <select id="UserId" name="UserId" class="selectpicker col-md-12" data-style="select-with-transition" title="Choose Company" asp-items="ViewBag.UserId"></select>
+                        <select required style="padding-bottom: 5px;" id="UserL" name="UserL" class="selectpicker col-md-12" data-style="select-with-transition" multiple="" title="Choose Encoder" asp-items="ViewBag.UserList"></select>
 
                         <div class="form-group">
                             <input type="button" id="btnCreate" value="Save" class="btn btn-default" />
@@ -78,9 +78,6 @@
 
     $(function () {
 
-
-
-
         var deptlist = '@Html.Raw(ViewBag.DepartmentsId)';
         var chars = deptlist.split(',');
         var names ="";
@@ -93,12 +90,28 @@
         $('#DepartmentL :selected').each(function(i, selected) {
             textvalues[i] = $(selected).text();
         });
-
-
-
-
-
         $("#DepartmentL").closest("div").find(".filter-option-inner-inner").html(textvalues.toString())
+        
+
+
+        var userlist = '@Html.Raw(ViewBag.UserId)';
+       
+        chars = userlist.split(',');
+        names ="";
+        cnt = 0;
+        console.log(chars);
+        for (let elements of chars) {
+            $("#UserL option[value='" + elements + "']").prop("selected", true);
+        }
+
+        textvalues = [];
+        $('#UserL :selected').each(function(i, selected) {
+            textvalues[i] = $(selected).text();
+        });
+       
+        $("#UserL").closest("div").find(".filter-option-inner-inner").html(textvalues.toString())
+
+
 
 
 
@@ -108,9 +121,11 @@
 
         var data = $('#frmCluster').serializeArray();
         var deptid = $('#DepartmentL').val();
+        var userid = $('#UserL').val();
         var code = $('#Code').val();
         var name =   $('#Name').val();
         data.push({ name: "Departments", value: deptid })
+        data.push({ name: "UserId", value: userid })
 
         if (code.trim() == "") {
             alert("Kindly set Code");

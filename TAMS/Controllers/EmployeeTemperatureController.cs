@@ -29,7 +29,12 @@ namespace TAMS.Controllers
         // GET: EmployeeTemperature
         public async Task<IActionResult> Index()
         {
-            
+            var employeeList = _context.Employees.Where(a => a.Status == "Active").Select(b => new
+            {
+                b.Id,
+                Name = b.LastName + ", " + b.FirstName,
+            });
+            ViewData["Employees"] = new SelectList(employeeList.OrderBy(a => a.Name), "Id", "Name");
             return View();
         }
       
@@ -47,47 +52,53 @@ namespace TAMS.Controllers
 
             DateTime dt = new DateTime(1, 1, 1);
             string status = "";
+            string message = "";
+            string[]stat = new string[2];
+            stat[0] = "Active";
+            stat[1] = "Manual";
             var v =
 
                 _context.AttendanceLogs
-                .Where(a => a.Status == "Active")
+                .Where(a => stat.Contains(a.Status))
                 .Where(a=>a.CreatedDate >= startDate && a.CreatedDate <= endDate)
-               
                 .Select(a => new {
-
                     a.Id,
-                    
-                    a.Employees.EmployeeNo
-                                     ,
-                    EmployeeName = a.Employees.LastName + ", " + a.Employees.FirstName
-                                     ,
-                    a.Temperature1
-                                     ,
-                    a.Temperature2
-                                      ,
+                    a.Employees.EmployeeNo,
+                    EmployeeName = a.Employees.LastName + ", " + a.Employees.FirstName,
+                    a.Temperature1,
+                    a.Temperature2,
                     a.CreatedDate,
                     DepartmentName = a.Employees.Department.Name,
                     a.Employees.DepartmentId
-
-
-
                 });
 
             
             status = "success";
+          
 
-
+            var al = v.ToList();
             if (userrole != "EHSAdmin" && userrole != "Admin")
             {
+                //kcm
+                //deptAccess = _context.Clusters.FirstOrDefault(a => a.UserId == Convert.ToInt32(userid)).Departments;
+                int[] deptid;
+                int x = 0;
+                var cu = _context.ClusterUsers.Where(a => a.Status == "Active").Where(a => a.UserId == Convert.ToInt32(userid));
+                deptid = new int[cu.Count()];
+                foreach (var item in cu)
+                {
+                    deptid[x] = item.DepartmentId;
+                    x++;
+                }
+                //deptAccess = _context.ClusterUsers.Where(a=>a.Status == "Active")
+                //    .FirstOrDefault(a => a.UserId == Convert.ToInt32(userid)).Departments;
 
-                deptAccess = _context.Clusters.FirstOrDefault(a => a.UserId == Convert.ToInt32(userid)).Departments;
-
-                int[] deptId = deptAccess.Split(',').Select(n => Convert.ToInt32(n)).ToArray();
+                //int[] deptId = deptAccess.Split(',').Select(n => Convert.ToInt32(n)).ToArray();
                 
-                v = v.Where(a => deptId.Contains(a.DepartmentId));
+                v = v.Where(a => deptid.Contains(a.DepartmentId));
             }
 
-
+            var al2 = v.ToList();
 
             var model = new
             {
@@ -209,6 +220,77 @@ namespace TAMS.Controllers
 
             return Json(model);
         }
+        public JsonResult saveEmployee(int empid)
+        {
+            string message = "";
+            string status = "";
+            string[] stat = new string[2];
+            stat[0] = "Active";
+            stat[1] = "Manual";
+
+            try
+            {
+                var emp = _context.AttendanceLogs.Where(a => a.CreatedDate == DateTime.Now.Date).Where(a => a.EmployeeId == empid).Where(a=> stat.Contains(a.Status)).Count();
+                if (emp == 0)
+                {
+                    DateTime dt = new DateTime(0001, 01, 01);
+                    AttendanceLog attendanceLog = new AttendanceLog();
+                    attendanceLog.EmployeeId = empid;
+                    attendanceLog.CreatedDate = DateTime.Now.Date;
+                    attendanceLog.TimeIn = dt;
+                    attendanceLog.TimeOut = dt;
+                    attendanceLog.Status = "Manual";
+                    attendanceLog.Type = "Regular";
+                    attendanceLog.Remarks = "Manual input from Temperature Module";
+                    attendanceLog.EntryType = "Manual";
+                    _context.AttendanceLogs.Add(attendanceLog);
+                    _context.SaveChanges();
+
+                    status = "success";
+                    message = "Data added";
+
+                    Log log = new Log
+                    {
+                        Module = "AttendanceLog",
+                        Descriptions = "Add Daily AttendanceLogs Id : " + attendanceLog.Id,
+                        Action = "Add",
+                        Status = "success",
+                        UserId = User.Claims.FirstOrDefault(c => c.Type == "UserName").Value
+                    };
+
+                    _context.Add(log);
+                    _context.SaveChanges();
+
+
+                }
+                else
+                {
+                    status = "success";
+                    message = "Data already existing";
+                }
+               
+               
+            }
+            catch (Exception e)
+            {
+                status = "fail";
+                message = e.Message;
+                
+            }
+
+            var model = new
+            {
+                status,
+                message
+            };
+
+
+
+
+
+            return Json(model);
+        }
       
+
     }
 }

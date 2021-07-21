@@ -37,7 +37,7 @@ namespace TAMS
 
 
             services.AddDbContext<TAMSContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("TAMSContextLive")
+            options.UseSqlServer(Configuration.GetConnectionString("TAMSContextLocal")
             , builder => builder.UseRowNumberForPaging() //add this for Incorrect syntax near 'OFFSET'. Invalid usage of the option NEXT in the FETCH statement
             ));
 

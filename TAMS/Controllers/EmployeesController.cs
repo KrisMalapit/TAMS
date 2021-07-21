@@ -363,6 +363,41 @@ namespace TAMS.Controllers
             };
             return Json(modelEmp);
         }
+        public JsonResult GetEmployeeInfo (int id)
+        {
+            string status = "";
+            string message = "";
+
+            try
+            {
+                var emp = _context.Employees.Include(a=>a.Department).Where(a=>a.Id == id);
+               
+                status = "success";
+                var model = new
+                {
+                    status,
+                    message = emp.FirstOrDefault().Department.Name,
+                    data = emp,
+
+                };
+                return Json(model);
+            }
+            catch (Exception e)
+            {
+                status = "fail";
+                message = e.Message;
+                var model = new
+                {
+                    status,
+                    message
+
+                };
+                return Json(model);
+            }
+
+
+            
+        }
 
     }
 }

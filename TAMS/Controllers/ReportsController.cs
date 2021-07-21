@@ -66,7 +66,8 @@ namespace TAMS.Controllers
 
                     if (userrole != "EHSAdmin" && userrole != "Admin")
                     {
-                        rvm.deptAccess = _context.Clusters.FirstOrDefault(a => a.UserId == Convert.ToInt32(userid)).Departments;
+                        //kcm
+                        //rvm.deptAccess = _context.Clusters.FirstOrDefault(a => a.UserId == Convert.ToInt32(userid)).Departments;
                     }
                     else
                     {

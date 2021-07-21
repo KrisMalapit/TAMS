@@ -47,7 +47,7 @@ namespace TAMS.Controllers
                     a.Departments,
 
                     a.Status,
-                    a.Users.Username
+                    //a.Users.Username
                     
 
 
@@ -96,7 +96,7 @@ namespace TAMS.Controllers
             });
 
             ViewData["DepartmentList"] = new SelectList(deptList.OrderBy(a => a.Name), "Id", "Name");
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Username");
+            ViewData["UserId"] = new SelectList(_context.Users.OrderBy(a => a.Username), "Id", "Username");
 
             return View();
         }
@@ -124,6 +124,7 @@ namespace TAMS.Controllers
                     log.Status = status;
                     _context.Logs.Add(log);
                     _context.SaveChanges();
+
                 }
                 else
                 {
@@ -131,7 +132,6 @@ namespace TAMS.Controllers
                     _context.Update(Cluster);
                     _context.SaveChanges();
                     status = "success";
-
 
                     Log log = new Log();
                     log.Action = "Modify";
@@ -141,6 +141,42 @@ namespace TAMS.Controllers
                     _context.SaveChanges();
 
                 }
+
+
+                int[] deptId = Cluster.Departments.Split(',').Select(n => Convert.ToInt32(n)).ToArray();
+                int[] userId = Cluster.UserId.Split(',').Select(n => Convert.ToInt32(n)).ToArray();
+                var cu = _context.ClusterUsers.Where(a => a.ClusterId == Cluster.Id);
+                if (cu != null)
+                {
+                    cu.ToList().ForEach(a => a.Status = "Deleted");
+                }
+                _context.SaveChanges();
+                foreach (var dept in deptId)
+                {
+                    foreach (var user in userId)
+                    {
+                        int cntUser = _context.ClusterUsers.Where(a => a.DepartmentId == dept)
+                            .Where(a => a.UserId == user)
+                            .Where(a=>a.Status == "Active")
+                            .Count();
+
+                        if (cntUser == 0)
+                        {
+                            var cUser = new ClusterUser()
+                            {
+                                DepartmentId = dept,
+                                UserId = user,
+                                ClusterId = Cluster.Id
+                            };
+
+                            _context.Add(cUser);
+                        }
+
+                    };
+                    
+                };
+                _context.SaveChanges();
+
 
 
             }
@@ -183,10 +219,16 @@ namespace TAMS.Controllers
                 b.Id,
                 b.Name,
             });
-
+            var userList = _context.Users.Where(a => a.Status == "1").Select(b => new
+            {
+                b.Id,
+                b.Username,
+            });
+            
             ViewData["DepartmentList"] = new SelectList(deptList.OrderBy(a => a.Name), "Id", "Name");
             ViewData["DepartmentsId"] = cluster.Departments;
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Username",cluster.UserId);
+            ViewData["UserList"] = new SelectList(userList.OrderBy(a => a.Username), "Id", "Username");
+            ViewData["UserId"] = cluster.UserId;
             return View(cluster);
         }
 

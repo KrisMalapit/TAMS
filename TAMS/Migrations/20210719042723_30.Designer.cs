@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TAMS.Models;
 
 namespace TAMS.Migrations
 {
     [DbContext(typeof(TAMSContext))]
-    partial class TAMSContextModelSnapshot : ModelSnapshot
+    [Migration("20210719042723_30")]
+    partial class _30
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -85,13 +87,13 @@ namespace TAMS.Migrations
 
                     b.Property<int>("ClusterId");
 
-                    b.Property<int>("DepartmentId");
-
                     b.Property<string>("Status");
 
                     b.Property<int>("UserId");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClusterId");
 
                     b.ToTable("ClusterUsers");
                 });
@@ -289,6 +291,14 @@ namespace TAMS.Migrations
                     b.HasOne("TAMS.Models.Employee", "Employees")
                         .WithMany()
                         .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("TAMS.Models.ClusterUser", b =>
+                {
+                    b.HasOne("TAMS.Models.Cluster", "Clusters")
+                        .WithMany()
+                        .HasForeignKey("ClusterId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

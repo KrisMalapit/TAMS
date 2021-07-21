@@ -8,40 +8,68 @@
 @*<link rel="stylesheet" href="~/css/font-material-design.css">*@
 <style>
     .inpTemp {
-    border-color:lightgray;
-    border-width:0.5px!important;
+        border-color: lightgray;
+        border-width: 0.5px !important;
     }
-    .inpTemp:focus {
-        background-color: yellow;
-    }
+
+        .inpTemp:focus {
+            background-color: yellow;
+        }
 </style>
 
 
 
 
-    
 
 
 
+<div class="modal fade" id="modalEmployee" lass="modal hide" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add Employee</h5>
+
+            </div>
+            <div class="modal-body">
+
+                <select style="padding-bottom:5px;" id="EmployeeId" name="EmployeeId" class="selectpicker col-md-12" data-style="select-with-transition"  title="Choose Employee" asp-items="ViewBag.Employees"></select>
+                <br />
+                <br />
+                <div class="form-group col-md-12">
+                    <label class="col-md-2" >Department</label> <br />
+                    <input id="Department" class="form-control" value="" disabled />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnSave">Add</button>&nbsp;
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> &nbsp;
+
+
+            </div>
+        </div>
+    </div>
+</div>
 
 
 
 <div class="row">
-    
+
     <div class="col-md-12">
 
         <div class="card">
             <div class="card-header card-header-primary card-header-icon">
                 <div class="card-text">
                     <h4 class="card-title">Employee Temperature Logs</h4>
-                    
+
                 </div>
             </div>
 
             <div class="card-body">
                 @*<div style="float: left">*@
-                <button id="btnViewEmp" class="btn btn-default" >Print</button>
+                <button id="btnAddEmployee" class="btn btn-success"><i class="material-icons" style="font-size: 15px;">add</i>Add Employee</button>
+                <button id="btnViewEmp" class="btn btn-default">Print</button>
                 <button id="btnExportEmp" class="btn btn-default">Export to Excel</button>
+
                 @*</div>*@
                 <div id="reportrange" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; float: right">
                     <i class="material-icons" style="font-size: 15px;">date_range</i>
@@ -55,12 +83,12 @@
 
                         <thead>
                             <tr>
-                                <th>Date</th>
-                                <th>Employee No</th>
-                                <th>Employee Name</th>
-                                <th>Temperature 1</th>
-                                <th>Temperature 2</th>
-                                <th>Department</th>
+                                <th style="width:10%;">Date</th>
+                                <th style="width:10%;">Employee No</th>
+                                <th style="width:30%;">Employee Name</th>
+                                <th style="width:10%;">Temperature 1</th>
+                                <th style="width:10%;">Temperature 2</th>
+                                <th style="width:30%;">Department</th>
                             </tr>
 
                         </thead>
@@ -74,29 +102,110 @@
 
 </div>
 
-    <script>
+<script>
+
+    var _start;
+    var _end
+
         var changesmade = "false";
         $(function () {
             $from = moment().subtract(0, 'days').format('MM/DD/YYYY');
             $to = moment().subtract(0, 'days').format('MM/DD/YYYY');
-
-            
+            $('#EmployeeId').removeAttr("selected");
+            $("#Department").val("");
         })
+
+        $("#btnAddEmployee").click(function () {
+            $("#modalEmployee").modal("show");
+        })
+
+    $("#btnSave").click(function () {
+
+        $.ajax({
+                url: "@Url.Action("saveEmployee")"
+                , method: "POST"
+            , data: { empid: $("#EmployeeId").val()}
+                , dataType: 'json'
+                , success: function (responsedata) {
+                    
+                    $("#Department").val("");
+                    if (responsedata.status == "success") {
+                        $.notify({
+                            icon: "add_alert",
+                            message: "<b>Success</b> - " + responsedata.message
+
+                        },
+                            {
+                                type: "success",
+                                timer: 1000,
+                                placement: {
+                                    from: "top",
+                                    align: "center"
+                                }
+                            });
+                               loadDatatable(_start,_end)
+                            } else {
+                             $.notify({
+                                icon: "add_alert",
+                                    message: "<b>Fail</b> - " + responsedata.message
+
+                                },
+                                    {
+                                type: "danger",
+                                        timer: 1000,
+                                        placement: {
+                                    from: "top",
+                                            align: "center"
+                                        }
+                                });
+                            }
+                        }
+                    })
+    })
+
+    $('#EmployeeId').change(function () {
         
+         $.ajax({
+                url: "@Url.Action("GetEmployeeInfo", "Employees")"
+                , method: "POST"
+                , data: { id: $(this).val()}
+                , dataType: 'json'
+                , success: function (responsedata) {
+                  
+                    $("#Department").val("");
+                            if (responsedata.status == "success") {
+                                $("#Department").val(responsedata.message)
+                                
+                            } else {
+                             $.notify({
+                                icon: "add_alert",
+                                    message: "<b>Fail</b> - " + responsedata.message
 
-
+                                },
+                                    {
+                                type: "danger",
+                                        timer: 1000,
+                                        placement: {
+                                    from: "top",
+                                            align: "center"
+                                        }
+                                });
+                            }
+                        }
+                    })
+    });
 
 
         $('#btnViewEmp').click(function () {
 
- 
-            
+
+
             window.open('@Url.Action("printReport", "Reports")?Report=rptEmployeeTemp&rptType=PDF&fDate=' + $from + '&tDate=' + $to);
 
         });
         $('#btnExportEmp').click(function () {
 
-          
+
             window.open('@Url.Action("printReport", "Reports")?Report=rptEmployeeTemp&rptType=Excel&fDate=' + $from + '&tDate=' + $to);
 
         });
@@ -105,18 +214,20 @@
     $(function () {
         var start = moment().subtract(0, 'days');
         var end = moment();
+
         
-
-
         function cb(start, end) {
             $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
             loadDatatable(start, end)
-            
+
+            _start = start;
+            _end = end;
+
         }
 
-         
 
-        
+
+
 
 
 
@@ -138,7 +249,7 @@
         })
 
         function loadDatatable(start,end) {
-          
+
             var data = [];
             $s = start.format('MM/DD/YYYY');
             $e = end.format('MM/DD/YYYY');
@@ -164,10 +275,10 @@
                             var temp1 = "<input onkeypress='return isNumberKey(event)' onBlur='saveChanges(this)' onfocus='this.select();' onmouseup='return false;' class='inpTemp' style='direction:rtl;' data-type='temp1' data-id='" + $id +"' value=" + parseFloat(responsedata.data[i].temperature1).toFixed(1)+ ">";
                             var temp2 = "<input onkeypress='return isNumberKey(event)' onBlur='saveChanges(this)' onfocus='this.select();' onmouseup='return false;' class='inpTemp ' style='direction:rtl;' data-type='temp2' data-id='" + $id+"' value=" + parseFloat(responsedata.data[i].temperature2).toFixed(1) + ">";
 
-                       
 
 
-                          
+
+
 
                             data.push([
                                 moment(
@@ -200,9 +311,9 @@
                             },
 
                             "columnDefs": [
-                             
+
                                 { orderable: false, targets: [3,4]}
-                               
+
                             ],
                             "order": [[0, "asc"]]
                         });
@@ -227,9 +338,9 @@
 
             var dataX = {};
             dataX[0] = x;
-            
-            
-            
+
+
+
 
             $.ajax({
                 url: "@Url.Action("saveTemperature", "EmployeeTemperature")"
@@ -238,11 +349,11 @@
                     , dataType: 'json'
                 , success: function (responsedata) {
 
-                        
+
                             if (responsedata.status == "success") {
                                 var o = dataX[0];
-                                
-                                $(dataX[0]).attr('value', $(o).val()) 
+
+                                $(dataX[0]).attr('value', $(o).val())
                              $.notify({
                                 icon: "add_alert",
                                     message: "<b>Success</b> User details updated!"
@@ -256,8 +367,8 @@
                                             align: "right"
                                         }
                                 });
-                        
-                           
+
+
 
 
                             } else {
@@ -287,4 +398,4 @@
 
             return true;
         }
-    </script>
+</script>
